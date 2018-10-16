@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -10,6 +11,16 @@ namespace Controls
 {
     public class ListBoxMultiSelect : ListBox
     {
+        public static readonly RoutedEvent DropCompletedEvent = EventManager.RegisterRoutedEvent("DropCompleted", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UIElement));
+        public event RoutedEventHandler DropCompleted
+        {
+            add { AddHandler(DropCompletedEvent, value); }
+            remove { RemoveHandler(DropCompletedEvent, value); }
+        }
+        public ListBoxMultiSelect()
+        {
+            SelectionMode = SelectionMode.Extended;
+        }
         protected override System.Windows.DependencyObject GetContainerForItemOverride()
         {
             return new ListBoxMultiSelectItem();
@@ -19,7 +30,10 @@ namespace Controls
         {
             if (!this.IsKeyboardFocusWithin)
             {
-                this.SelectedItems.Clear();
+                if (this.SelectedItems != null)
+                {
+                    this.SelectedItems.Clear();
+                }
             }
             base.OnLostKeyboardFocus(e);
         }

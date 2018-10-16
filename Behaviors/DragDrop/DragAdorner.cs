@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Media;
 
-namespace Behaviors.ListBoxDragDropBehavior
+namespace Behaviors.DragDrop
 {
     public class DragAdorner : Adorner
     {

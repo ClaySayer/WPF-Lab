@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using Behaviors.DragDrop;
 
 namespace Behaviors.ListBoxDragDropBehavior
 {
-    internal class DragManager
+    internal class DragDropManagerOld
     {
         private List<dynamic> _data;
         private dynamic _currentItem = null;
@@ -20,7 +21,7 @@ namespace Behaviors.ListBoxDragDropBehavior
         private DataTemplate _dataTemplate;
         private const int DRAG_WAIT_COUNTER_LIMIT = 10;
 
-        internal DragManager()
+        internal DragDropManagerOld()
         {
             _data = new List<dynamic>();
         }
@@ -47,7 +48,10 @@ namespace Behaviors.ListBoxDragDropBehavior
             if ((_isDragging == false) && (Math.Abs(point.X - _dragStartPosition.X) > SystemParameters.MinimumHorizontalDragDistance) ||
                 (Math.Abs(point.Y - _dragStartPosition.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
-                _data.Add(_currentItem);
+                if (!_data.Contains(_currentItem)) {
+                    _data.Add(_currentItem);
+                }
+                Console.WriteLine("Add Items:" +_data.Count());
                 DragStart(dragSource);
                 return true;
             }
@@ -106,14 +110,13 @@ namespace Behaviors.ListBoxDragDropBehavior
         internal void Drop()
         {
             RemoveAdorners();
-            _data.Clear();
         }
 
         private void DragStart(ListBox dragSource)
         {
             _isDragging = true;
             DataObject data = new DataObject(_data.GetType(), _data);
-            DragDropEffects e = DragDrop.DoDragDrop(dragSource, data, DragDropEffects.Copy | DragDropEffects.Move);
+            DragDropEffects e = System.Windows.DragDrop.DoDragDrop(dragSource, data, DragDropEffects.Copy | DragDropEffects.Move);
             dragSource.SelectedItems.Clear();
         }
 
