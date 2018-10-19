@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 
 namespace Behaviors.DragDrop.EventArgs
@@ -10,6 +8,9 @@ namespace Behaviors.DragDrop.EventArgs
         public DragDropEffects Effects { get; set; }
         public IDataObject Data { get; set; }
         public DataTemplate DragVisual { get; set; }
+        public UIElement DragElement { get; set; }
+        public Point DragOffset { get; set; }
+        public Point StartPoint { get; set; }
         public Point GetPosition(IInputElement element)
         {
             return Mouse.GetPosition(element);
@@ -20,18 +21,5 @@ namespace Behaviors.DragDrop.EventArgs
             Data = args.Data;
         }
         public DragEventArgs() { }
-    }
-    public class DragInitializeEventArgs : RoutedEventArgs
-    {
-        public DragDropEffects AllowedEffects { get; set; }
-        public object Data { get; set; }
-        public DataTemplate DragVisual { get; set; }
-        public string Type { get; set; }
-    }
-
-    public class DropCompletedEventArgs : RoutedEventArgs
-    {
-        public IList Data { get; set; }
-        public DragDropEffects Effects { get; set; }
     }
 }

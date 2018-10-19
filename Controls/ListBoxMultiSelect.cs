@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Controls
 {
-    public class ListBoxMultiSelect : ListBox
+    public class ListBoxMultiSelect : System.Windows.Controls.ListBox
     {
-        public static readonly RoutedEvent DropCompletedEvent = EventManager.RegisterRoutedEvent("DropCompleted", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UIElement));
+        public static readonly RoutedEvent DropCompletedEvent = EventManager.RegisterRoutedEvent("Fred", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UIElement));
         public event RoutedEventHandler DropCompleted
         {
             add { AddHandler(DropCompletedEvent, value); }

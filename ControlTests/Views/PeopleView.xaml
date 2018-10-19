@@ -8,37 +8,34 @@
              mc:Ignorable="d"
              xmlns:converters="clr-namespace:ControlTests.Converters"
              xmlns:Interactivity="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             xmlns:dd="clr-namespace:Behaviors.DragDrop;assembly=Behaviors"
              xmlns:ddBehavior="clr-namespace:Behaviors.ListBoxDragDropBehavior;assembly=Behaviors"
              xmlns:behaviors="clr-namespace:Behaviors;assembly=Behaviors"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450"
+d:DesignWidth="800">
     <UserControl.Resources>
-        <DataTemplate x:Key="listBoxDataTemplate" DataType="{x:Type viewmodels:PersonViewModel}">
-            <Border>
+        <DataTemplate  x:Key="PersonDataTemplate" DataType="{x:Type viewmodels:PersonViewModel}">
+            <Border Background="red">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Width="150" Text="{Binding Path=Name}"/>
+                    <TextBlock Text="{Binding Path=Name}"/>
                 </StackPanel>
             </Border>
         </DataTemplate>
-        <converters:ItemsCollectionToPeopleConverter x:Key="ItemsCollectionToPeopleConverter" />
+        <converters:DragEventArgsToPeopleConverter x:Key="DragEventArgsToPeopleConverter" />
     </UserControl.Resources>
     <Grid>
-        <Label>Here</Label>
-        <controls:ListBoxMultiSelect ItemsSource="{Binding People}" ItemTemplate="{StaticResource listBoxDataTemplate}">
+        <controls:ListBoxMultiSelect ItemsSource="{Binding People}" ItemTemplate="{StaticResource PersonDataTemplate}" HorizontalContentAlignment="Stretch">
             <Interactivity:Interaction.Behaviors>
-                <ddBehavior:ListBoxDragDropBehavior
-                    DragVisual="{StaticResource listBoxDataTemplate}">
-                </ddBehavior:ListBoxDragDropBehavior>
+                <ddBehavior:ListBoxDragDropBehavior />
                 <behaviors:EventToCommandBehavior
                         Event="DropCompleted"
                         Command="{Binding Path=RemoveCommand}"
                         PassArguments="True"
-                        Converter="{StaticResource ItemsCollectionToPeopleConverter}"/>
+                        Converter="{StaticResource DragEventArgsToPeopleConverter}"/>
                 <behaviors:EventToCommandBehavior
                         Event="Drop"
                         Command="{Binding Path=InsertCommand}"
                         PassArguments="true"
-                        Converter="{StaticResource ItemsCollectionToPeopleConverter}"/>
+                        Converter="{StaticResource DragEventArgsToPeopleConverter}"/>
             </Interactivity:Interaction.Behaviors>
         </controls:ListBoxMultiSelect>
     </Grid>

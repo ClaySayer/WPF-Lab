@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interactivity;
@@ -7,12 +6,11 @@ using System.Windows.Media;
 using Behaviors.DragDrop;
 using System.Collections;
 using System.Collections.ObjectModel;
-using Behaviors.DragDrop.EventArgs;
 using Behaviors.DragDrop.DataFormats;
 
 namespace Behaviors.ListBoxDragDropBehavior
 {
-    public class ListBoxDragDropBehavior: Behavior<Controls.ListBoxMultiSelect>
+    public class ListBoxDragDropBehavior: Behavior<ListBox>
     {
         #region Dependency Properties
         public static readonly DependencyProperty DragVisualProperty = DependencyProperty.Register("DragVisual", typeof(DataTemplate), typeof(ListBoxDragDropBehavior), null);
@@ -25,8 +23,6 @@ namespace Behaviors.ListBoxDragDropBehavior
             set { SetValue(DragVisualProperty, value); }
         }
         #endregion
-
-        //public event EventHandler<DragDrop.EventArgs.DragEventArgs> DropCompleted;
 
         protected override void OnAttached()
         {
@@ -43,15 +39,37 @@ namespace Behaviors.ListBoxDragDropBehavior
             var data = GetItems(listBox);
             if (data.Count > 0)
             {
+                UIElement item = GetItemContainerFromPoint(listBox, e.StartPoint);
+                Point mousePosition = e.GetPosition(listBox);
+                Point itemPosition = item.TranslatePoint(new Point(), listBox);
+                Point offset = new Point(mousePosition.X - itemPosition.X, mousePosition.Y - itemPosition.Y);
+                e.DragOffset = offset;
                 string itemType = listBox.SelectedItems[0].GetType().Name;
                 e.Data = new DataObject(LocalDataFormats.GetDataFormat(itemType).Name, data);
+                e.DragVisual = CreateDragVisual(data);
+                e.DragElement = item;
             }
-            if (DragVisual != null)
+        }
+
+        public static UIElement GetItemContainerFromPoint(ListBox ListBox, Point p)
+        {
+            UIElement element = ListBox.InputHitTest(p) as UIElement;
+            while (element != null)
             {
-                //TODO use local DragVisual parameter if supplied, use ItemTemplate on Parent if supplied
-                //provide sensible default if no data template supplied
-                e.DragVisual = DragVisual;
+                if (element == ListBox)
+                    return null;
+
+                object data = ListBox.ItemContainerGenerator.ItemFromContainer(element);
+                if (data != DependencyProperty.UnsetValue)
+                {
+                    return element;
+                }
+                else
+                {
+                    element = VisualTreeHelper.GetParent(element) as UIElement;
+                }
             }
+            return null;
         }
 
         private DataTemplate CreateDragVisual(IList items)
@@ -88,8 +106,8 @@ namespace Behaviors.ListBoxDragDropBehavior
         private void OnDropCompleted(object sender, DragDrop.EventArgs.DragEventArgs e)
         {
             UIElement element = sender as UIElement;
-            e.RoutedEvent = Controls.ListBoxMultiSelect.DropCompletedEvent;
-            element.RaiseEvent(e);
+            //e.RoutedEvent = Controls.ListBoxMultiSelect.DropCompletedEvent;
+            //element.RaiseEvent(e);
         }
 
         private void OnGiveFeedback(object sender, GiveFeedbackEventArgs e)

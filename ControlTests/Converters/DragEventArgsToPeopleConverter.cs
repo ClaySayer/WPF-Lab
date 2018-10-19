@@ -1,20 +1,12 @@
-﻿using Behaviors.DragDrop.EventArgs;
-using ControlTests.ViewModels;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
-using Behaviors.DragDrop;
 using System.Collections;
 using Behaviors.DragDrop.DataFormats;
 
 namespace ControlTests.Converters
 {
-    public class ItemsCollectionToPeopleConverter : IValueConverter
+    public class DragEventArgsToPeopleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

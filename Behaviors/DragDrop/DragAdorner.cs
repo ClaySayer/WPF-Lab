@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Documents;
+﻿using System.Windows.Documents;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Media;
@@ -15,11 +11,13 @@ namespace Behaviors.DragDrop
         private AdornerLayer _adornerLayer;
         private double _leftOffset;
         private double _topOffset;
+        private Point _offset;
 
-        public DragAdorner(object data, DataTemplate dataTemplate, UIElement adornedElement, AdornerLayer adornerLayer)
+        public DragAdorner(object data, DataTemplate dataTemplate, UIElement adornedElement, AdornerLayer adornerLayer, Point offset)
             : base(adornedElement)
         {
             _adornerLayer = adornerLayer;
+            _offset = offset;
             _contentPresenter = new ContentPresenter() { Content = data, ContentTemplate = dataTemplate, Opacity = 0.75 };
 
             _adornerLayer.Add(this);
@@ -49,8 +47,8 @@ namespace Behaviors.DragDrop
 
         public void UpdatePosition(double left, double top)
         {
-            _leftOffset = left;
-            _topOffset = top;
+            _leftOffset = left -_offset.X;
+            _topOffset = top - _offset.Y;
             if (_adornerLayer != null)
             {
                 _adornerLayer.Update(this.AdornedElement);

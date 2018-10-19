@@ -54,7 +54,6 @@
     <Compile Include="EventToCommandBehavior.cs" />
     <Compile Include="DragDrop\DragAdorner.cs" />
     <Compile Include="DragDrop\DragDropDataManager.cs" />
-    <Compile Include="ListBoxDragDropBehavior\DragDropManagerOld.cs" />
     <Compile Include="ListBoxDragDropBehavior\InsertAdorner.cs" />
     <Compile Include="ListBoxDragDropBehavior\ListBoxDragDropBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

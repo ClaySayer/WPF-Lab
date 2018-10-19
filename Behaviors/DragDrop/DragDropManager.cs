@@ -2,47 +2,45 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using Behaviors.DragDrop.EventArgs;
 
 namespace Behaviors.DragDrop
 {
-
     public static class DragDropManager
     {
         private static readonly Dictionary<UIElement, DragSource> dragSources = new Dictionary<UIElement, DragSource>();
         private static readonly Dictionary<UIElement, DropTarget> dropTargets = new Dictionary<UIElement, DropTarget>();
         private static DragSource dragSource;
-        private static UIElement currentDragSource;
+        private static UIElement dragSourceElement;
         private static DropTarget dropTarget;
         private static bool isMouseDown = false;
         private static bool isDragging = false;
         private static Point dragStartPosition;
         private static DataTemplate dragVisual;
         private static DragAdorner dragAdorner;
+        private static Point dragOffset;
+        private static UIElement dragElement;
 
         private class DragSource
         {
-            public EventHandler<EventArgs.DragEventArgs> DragInitializeHandler { get; set; }
+            public EventHandler<DragDrop.EventArgs.DragEventArgs> DragInitializeHandler { get; set; }
             public EventHandler<GiveFeedbackEventArgs> GiveFeedbackHandler { get; set; }
             public EventHandler<QueryContinueDragEventArgs> QueryContinueDragHandler { get; set; }
-            public EventHandler<EventArgs.DragEventArgs> DropCompletedHandler { get; set; }
+            public EventHandler<DragDrop.EventArgs.DragEventArgs> DropCompletedHandler { get; set; }
         }
 
         private class DropTarget
         {
-            public EventHandler<EventArgs.DragEventArgs> DropHandler { get; set; }
+            public EventHandler<DragEventArgs> DropHandler { get; set; }
         }
 
         public static void AddDragSource(
             UIElement element,
-            EventHandler<EventArgs.DragEventArgs> dragInitializeHandler,
+            EventHandler<DragDrop.EventArgs.DragEventArgs> dragInitializeHandler,
             EventHandler<GiveFeedbackEventArgs> giveFeedbackHandler,
             EventHandler<QueryContinueDragEventArgs> queryContinueDragHandler,
-            EventHandler<EventArgs.DragEventArgs> dropCompletedHandler
+            EventHandler<DragDrop.EventArgs.DragEventArgs> dropCompletedHandler
             )
         {
             AddDragSourceListeners(element);
@@ -55,13 +53,13 @@ namespace Behaviors.DragDrop
             });
         }
 
-        public static void AddDropTarget(UIElement element, EventHandler<EventArgs.DragEventArgs> dropHandler)
+        public static void AddDropTarget(UIElement element, EventHandler<DragEventArgs> dropHandler)
         {
             dropTargets.Add(element, new DropTarget { DropHandler = dropHandler });
             element.PreviewDrop += new DragEventHandler(UIElement_PreviewDrop);
         }
 
-        public static void RemoveDropTarget(UIElement element, EventHandler<EventArgs.DragEventArgs> dropHandler)
+        public static void RemoveDropTarget(UIElement element, EventHandler<DragEventArgs> dropHandler)
         {
             dropTargets.Remove(element);
             element.PreviewDrop -= UIElement_PreviewDrop;
@@ -91,7 +89,7 @@ namespace Behaviors.DragDrop
             element.PreviewMouseLeftButtonUp -= UIElement_PreviewMouseLeftButtonUp;
             element.GiveFeedback -= GiveFeedback;
             element.PreviewDragEnter -= UIElement_PreviewDragEnter;
-            element.DragOver -= UIElement_PreviewDragOver;
+            element.PreviewDragOver -= UIElement_PreviewDragOver;
             element.PreviewDragLeave -= UIElement_PreviewDragLeave;
         }
 
@@ -122,8 +120,9 @@ namespace Behaviors.DragDrop
 
         #region Drag Events
 
-        private static void UIElement_PreviewDragEnter(object sender, System.Windows.DragEventArgs e)
+        private static void UIElement_PreviewDragEnter(object sender, DragEventArgs e)
         {
+            
             UIElement element = (UIElement)sender;
             var data = e.Data.GetData(e.Data.GetFormats()[0]);
             Point position = e.GetPosition(element);
@@ -134,47 +133,31 @@ namespace Behaviors.DragDrop
             }
         }
 
-        private static void UIElement_PreviewDragOver(object sender, System.Windows.DragEventArgs e)
+        private static void UIElement_PreviewDragOver(object sender, DragEventArgs e)
         {
+            e.Effects = DragDropEffects.None;
             //TODO Select DragDropEffect based on Keys
             //See https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.control.dodragdrop?view=netframework-4.7.2
-            e.Effects = DragDropEffects.None;
             UIElement element = (UIElement)sender;
-            if(element != currentDragSource)
-            {
-                e.Effects = DragDropEffects.Copy;
-            }
             Point position = e.GetPosition(element);
+            if(element != dragSourceElement)
+            {
+                e.Effects = DragDropEffects.Copy | DragDropEffects.Move;
+            }
             UpdateFeedback(position);
             e.Handled = true;
         }
 
-        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            //get parent item
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
-
-            //we've reached the end of the tree
-            if (parentObject == null) return null;
-
-            //check if the parent matches the type we're looking for
-            if (parentObject is T parent)
-                return parent;
-            else
-                return FindParent<T>(parentObject);
-        }
-
-        private static void UIElement_PreviewDragLeave(object sender, System.Windows.DragEventArgs e)
+        private static void UIElement_PreviewDragLeave(object sender, DragEventArgs e)
         {
             DetachAdorners();
             e.Handled = true;
         }
 
-        private static void UIElement_PreviewDrop(object sender, System.Windows.DragEventArgs e)
+        private static void UIElement_PreviewDrop(object sender, DragEventArgs e)
         {
             UIElement element = (UIElement)sender;
-            EventArgs.DragEventArgs args = new EventArgs.DragEventArgs(e);
-            OnDrop(element, args);
+            OnDrop(element, e);
             DetachAdorners();
         }
 
@@ -211,26 +194,35 @@ namespace Behaviors.DragDrop
         private static void DragStart(UIElement element)
         {
             isDragging = true;
-            EventArgs.DragEventArgs args = new EventArgs.DragEventArgs();
+            EventArgs.DragEventArgs args = new DragDrop.EventArgs.DragEventArgs
+            {
+                StartPoint = dragStartPosition
+            };
             OnDragInitialize(element, args);
             if(args.DragVisual != null)
             {
                 dragVisual = args.DragVisual;
             }
+            if(args.DragElement != null)
+            {
+                dragElement = args.DragElement;
+            }
             if (args.Data != null)
             {
-                currentDragSource = element;
-                DragDropEffects effects = System.Windows.DragDrop.DoDragDrop(element, args.Data, DragDropEffects.Copy|DragDropEffects.Scroll|DragDropEffects.Move);
-                EventArgs.DragEventArgs dropCompletedArgs = new EventArgs.DragEventArgs()
+                dragSourceElement = element;
+                dragOffset = args.DragOffset;
+                DragDropEffects effects = System.Windows.DragDrop.DoDragDrop(element, args.Data, args.Effects);
+                DragDrop.EventArgs.DragEventArgs dropCompletedArgs = new DragDrop.EventArgs.DragEventArgs
                 {
-                    Data = args.Data,
-                    Effects = effects
+                    Effects = effects,
+                    Data = args.Data
                 };
-                if (effects != DragDropEffects.None)
+                dragSourceElement = null;
+                dragOffset = new Point();
+                if (dropCompletedArgs.Effects != DragDropEffects.None)
                 {
                     OnDropCompleted(element, dropCompletedArgs);
                 }
-                currentDragSource = null;
             }
             isDragging = false;
             isMouseDown = false;
@@ -246,8 +238,7 @@ namespace Behaviors.DragDrop
                     if(dragAdorner == null)
                     {
                         var adornerLayer = AdornerLayer.GetAdornerLayer(element);
-                        //TODO remove Adorner creation from here and create in Behavior
-                        dragAdorner = new DragAdorner(item, dragVisual, element, adornerLayer);
+                        dragAdorner = new DragAdorner(data, dragVisual, element, adornerLayer, dragOffset);
                         dragAdorner.UpdatePosition(position.X, position.Y);
                     }
                 }
@@ -271,12 +262,12 @@ namespace Behaviors.DragDrop
             }
         }
 
-        private static void OnDragInitialize(UIElement element, EventArgs.DragEventArgs e)
+        private static void OnDragInitialize(UIElement element, DragDrop.EventArgs.DragEventArgs e)
         {
             dragSource.DragInitializeHandler?.Invoke(element, e);
         }
 
-        private static void OnDropCompleted(UIElement element, EventArgs.DragEventArgs e)
+        private static void OnDropCompleted(UIElement element, DragDrop.EventArgs.DragEventArgs e)
         {
             dragSource.DropCompletedHandler?.Invoke(element, e);
         }
@@ -284,7 +275,7 @@ namespace Behaviors.DragDrop
         {
             dragSource.GiveFeedbackHandler?.Invoke(element, e);
         }
-        private static void OnDrop(UIElement element, EventArgs.DragEventArgs e)
+        private static void OnDrop(UIElement element, DragEventArgs e)
         {
             dropTarget.DropHandler?.Invoke(element, e);
         }

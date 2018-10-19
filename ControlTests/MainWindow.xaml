@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ControlTests"
         xmlns:viewmodels="clr-namespace:ControlTests.ViewModels"
         xmlns:views="clr-namespace:ControlTests.Views"
         mc:Ignorable="d"
@@ -18,7 +17,6 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Grid.Column="2" Click="Button_Click">Click Me</Button>
         <views:PeopleView Grid.Column="0" DataContext="{Binding Building1}" />
         <views:PeopleView Grid.Column="1" DataContext="{Binding Building2}" />
     </Grid>
