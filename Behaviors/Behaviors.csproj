@@ -46,14 +46,23 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DragDrop\DataConverter.cs" />
+    <Compile Include="DragDrop\DataFormats.cs" />
+    <Compile Include="DragDrop\DragDropEventArgs.cs" />
+    <Compile Include="DragDrop\DragDropManager.cs" />
+    <Compile Include="DragDrop\IDragPayload.cs" />
     <Compile Include="EventToCommandBehavior.cs" />
-    <Compile Include="ListBoxDragDropBehavior\DragAdorner.cs" />
-    <Compile Include="ListBoxDragDropBehavior\DragManager.cs" />
-    <Compile Include="ListBoxDragDropBehavior\Helper.cs" />
+    <Compile Include="DragDrop\DragAdorner.cs" />
+    <Compile Include="DragDrop\DragDropDataManager.cs" />
     <Compile Include="ListBoxDragDropBehavior\InsertAdorner.cs" />
     <Compile Include="ListBoxDragDropBehavior\ListBoxDragDropBehavior.cs" />
-    <Compile Include="ListBoxDragDropBehavior\ListBoxDragDropConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Controls\Controls.csproj">
+      <Project>{4cc5550c-010f-4ad4-be5d-a994375f7b2d}</Project>
+      <Name>Controls</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

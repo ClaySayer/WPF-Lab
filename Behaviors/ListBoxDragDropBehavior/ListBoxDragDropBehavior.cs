@@ -1,179 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interactivity;
 using System.Windows.Media;
+using Behaviors.DragDrop;
+using System.Collections;
+using System.Collections.ObjectModel;
+using Behaviors.DragDrop.DataFormats;
 
 namespace Behaviors.ListBoxDragDropBehavior
 {
-    public class ListBoxDragDropBehavior: EventToCommandBehavior<ListBox>
+    public class ListBoxDragDropBehavior: Behavior<ListBox>
     {
-        #region Properties
-
-        public DataTemplate DataTemplate { get; set; }
-
+        #region Dependency Properties
+        public static readonly DependencyProperty DragVisualProperty = DependencyProperty.Register("DragVisual", typeof(DataTemplate), typeof(ListBoxDragDropBehavior), null);
         #endregion
 
-        private bool _isMouseDown;
-        private const int DRAG_WAIT_COUNTER_LIMIT = 10;
-        private DragManager _dragManager;
-
-        public ListBoxDragDropBehavior(): base()
+        #region Properties
+        public DataTemplate DragVisual
         {
-            _isMouseDown = false;
-            _dragManager = new DragManager();
+            get { return (DataTemplate)GetValue(DragVisualProperty); }
+            set { SetValue(DragVisualProperty, value); }
         }
+        #endregion
 
         protected override void OnAttached()
         {
             base.OnAttached();
             AssociatedObject.AllowDrop = true;
-            AssociatedObject.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(ListBox_PreviewMouseLeftButtonDown);
-            AssociatedObject.PreviewMouseMove += new MouseEventHandler(ListBox_PreviewMouseMove);
-            AssociatedObject.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(ListBox_PreviewMouseLeftButtonUp);
-            AssociatedObject.PreviewDrop += new DragEventHandler(ListBox_PreviewDrop);
-            AssociatedObject.PreviewQueryContinueDrag += new QueryContinueDragEventHandler(ListBox_PreviewQueryContinueDrag);
-            AssociatedObject.PreviewDragEnter += new DragEventHandler(ListBox_PreviewDragEnter);
-            AssociatedObject.PreviewDragOver += new DragEventHandler(ListBox_PreviewDragOver);
-            AssociatedObject.DragLeave += new DragEventHandler(ListBox_DragLeave);
-            AssociatedObject.GiveFeedback += new GiveFeedbackEventHandler(ListBox_GiveFeedback);
-            if (DataTemplate != null)
+            DragDropManager.AddDragSource(AssociatedObject, OnDragInitialize, OnGiveFeedback, null, OnDropCompleted);
+            DragDropManager.AddDropTarget(AssociatedObject, null);
+        }
+
+        private void OnDragInitialize(object sender, DragDrop.EventArgs.DragEventArgs e)
+        {
+            ListBox listBox = (ListBox)sender;
+            e.Effects = DragDropEffects.All;
+            var data = GetItems(listBox);
+            if (data.Count > 0)
             {
-                _dragManager.SetDataTemplate(DataTemplate);
+                UIElement item = GetItemContainerFromPoint(listBox, e.StartPoint);
+                Point mousePosition = e.GetPosition(listBox);
+                Point itemPosition = item.TranslatePoint(new Point(), listBox);
+                Point offset = new Point(mousePosition.X - itemPosition.X, mousePosition.Y - itemPosition.Y);
+                e.DragOffset = offset;
+                string itemType = listBox.SelectedItems[0].GetType().Name;
+                e.Data = new DataObject(LocalDataFormats.GetDataFormat(itemType).Name, data);
+                e.DragVisual = CreateDragVisual(data);
+                e.DragElement = item;
             }
-            else if(AssociatedObject.ItemTemplate != null){
-                _dragManager.SetDataTemplate(AssociatedObject.ItemTemplate);
+        }
+
+        public static UIElement GetItemContainerFromPoint(ListBox ListBox, Point p)
+        {
+            UIElement element = ListBox.InputHitTest(p) as UIElement;
+            while (element != null)
+            {
+                if (element == ListBox)
+                    return null;
+
+                object data = ListBox.ItemContainerGenerator.ItemFromContainer(element);
+                if (data != DependencyProperty.UnsetValue)
+                {
+                    return element;
+                }
+                else
+                {
+                    element = VisualTreeHelper.GetParent(element) as UIElement;
+                }
             }
-            _dragManager.SetDataTemplate(DataTemplate);
+            return null;
+        }
+
+        private DataTemplate CreateDragVisual(IList items)
+        {
+            DataTemplate dragVisualTemplate = SelectDragVisualTemplate();
+            switch (items.Count)
+            {
+                case 1: return dragVisualTemplate;
+                case 2: return dragVisualTemplate;
+                default: return dragVisualTemplate;
+
+            }
+        }
+
+        private DataTemplate SelectDragVisualTemplate()
+        {
+            if(DragVisual != null)
+            {
+                return DragVisual;
+            }
+            if(AssociatedObject.ItemTemplate != null)
+            {
+                return AssociatedObject.ItemTemplate;
+            }
+            return null;
         }
 
         protected override void OnDetaching()
         {
             base.OnDetaching();
-            AssociatedObject.AllowDrop = false;
-            AssociatedObject.PreviewMouseLeftButtonDown -= ListBox_PreviewMouseLeftButtonDown;
-            AssociatedObject.PreviewMouseMove -= ListBox_PreviewMouseMove;
-            AssociatedObject.PreviewMouseLeftButtonUp -= ListBox_PreviewMouseLeftButtonUp;
-            AssociatedObject.PreviewDrop -= ListBox_PreviewDrop;
-            AssociatedObject.PreviewQueryContinueDrag -= ListBox_PreviewQueryContinueDrag;
-            AssociatedObject.PreviewDragEnter -= ListBox_PreviewDragEnter;
-            AssociatedObject.PreviewDragOver -= ListBox_PreviewDragOver;
-            AssociatedObject.DragLeave -= ListBox_DragLeave;
-            AssociatedObject.GiveFeedback -= ListBox_GiveFeedback;
-            _dragManager = null;
+            DragDropManager.RemoveDragSource(AssociatedObject);
         }
 
-        #region Button Events
-
-        private void ListBox_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void OnDropCompleted(object sender, DragDrop.EventArgs.DragEventArgs e)
         {
-            _dragManager.UpdateSelector();
-            _isMouseDown = false;
+            UIElement element = sender as UIElement;
+            //e.RoutedEvent = Controls.ListBoxMultiSelect.DropCompletedEvent;
+            //element.RaiseEvent(e);
         }
 
-        private void ListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+        private void OnGiveFeedback(object sender, GiveFeedbackEventArgs e)
         {
-            if (_isMouseDown)
+
+            if (e.Effects == DragDropEffects.None)
             {
-                ListBox dragSource = (ListBox)sender;
-                Point point = e.GetPosition(dragSource);
-                if (_dragManager.InitiateDrag(dragSource, point))
-                {
-                    _isMouseDown = false;
-                }
+                Mouse.SetCursor(Cursors.No);
             }
-        }
-
-        private void ListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            ListBox listBox = (ListBox)sender;
-            Point p = e.GetPosition(listBox);
-            var item = Helper.GetDataObjectFromListBox(listBox, p);
-            if (_dragManager.InitializeDrag(p, item))
+            else
             {
-                _isMouseDown = true;
+                Mouse.SetCursor(Cursors.None);
             }
-        }
-
-        #endregion
-
-        #region Drag Events
-
-        private void ListBox_DragLeave(object sender, DragEventArgs e)
-        {
-            _dragManager.CleanDragFeedback();
-
             e.Handled = true;
-        }
-
-        private void ListBox_PreviewDragOver(object sender, DragEventArgs e)
-        {
-            UIElement dragItem = (UIElement)sender;
-            Point position = e.GetPosition(dragItem);
-            _dragManager.UpdateDragFeedBack(position);
-            e.Handled = true;
-        }
-
-        private void ListBox_GiveFeedback(object sender, System.Windows.GiveFeedbackEventArgs e)
-        {
-            Mouse.SetCursor(Cursors.None);
-            e.Handled = true;
-        }
-
-        private void ListBox_PreviewDragEnter(object sender, DragEventArgs e)
-        {
-            UIElement dragItem = (UIElement)sender;
-            var data = e.Data.GetData(e.Data.GetFormats()[0]);
-            Point position = e.GetPosition(dragItem);
-            _dragManager.InitializeDragFeedback(dragItem, data, position);
-            e.Handled = true;
-        }
-
-        private void ListBox_PreviewQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
-        {
-            if (e.EscapePressed)
-            {
-                _dragManager.CancelDrag(e);
-                _isMouseDown = false;
-                e.Handled = true;
-            }
-        }
-
-        private void ListBox_PreviewDrop(object sender, DragEventArgs e)
-        {
-            _dragManager.Drop();
-            UIElement originalSource = (UIElement)e.OriginalSource;
-            ListBox source = GetSourceListBox(originalSource);
-            source.SelectedItems.Clear();
-            _isMouseDown = false;
-            //ListBox listBox = (ListBox)sender;
-            //DetachAdorners();
-            //e.Handled = true;
-            //var data = e.Data.GetData(e.Data.GetFormats()[0]);
-            //if(data is IList)
-            //{
-            //    IList items = data as IList;
-            //    foreach(var item in items)
-            //    {
-            //        if(item.GetType() == ItemType)
-            //        {
-            //            if (!listBox.Items.Contains(item)) {
-            //                listBox.Items.Add(item);
-            //            }
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    e.Effects = DragDropEffects.None;
-            //}
-            //ResetState();
-            //_data = null;
-            //listBox.SelectedItems.Clear();
         }
 
         private ListBox GetSourceListBox(UIElement originalSource)
@@ -187,6 +135,32 @@ namespace Behaviors.ListBoxDragDropBehavior
             }
             return null;
         }
-        #endregion
+
+        private DataTemplate SelectDataTemplate()
+        {
+            if (DragVisual != null)
+            {
+                return DragVisual;
+            }
+            if (AssociatedObject.ItemTemplate != null)
+            {
+                return AssociatedObject.ItemTemplate;
+            }
+            return null;
+        }
+        private IList GetItems(ListBox source)
+        {
+            if (source.SelectionMode != SelectionMode.Single)
+            {
+                var items = source.SelectedItems;
+                return (IList)items;
+
+            }
+            ObservableCollection<object> list = new ObservableCollection<object>
+            {
+                source.SelectedItem
+            };
+            return (IList)list;
+        }
     }
 }

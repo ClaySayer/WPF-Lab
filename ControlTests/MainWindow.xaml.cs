@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlTests.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -25,11 +26,17 @@ namespace ControlTests
         public MainWindow()
         {
             InitializeComponent();
+            MainViewModel vm = (MainViewModel)DataContext;
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel vm = (MainViewModel)DataContext;
         }
     }
 }

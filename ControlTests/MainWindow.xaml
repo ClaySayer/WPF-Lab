@@ -3,24 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ControlTests"
-        xmlns:controls="clr-namespace:Controls;assembly=Controls"
-        xmlns:Interactivity="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-        xmlns:ddBehavior="clr-namespace:Behaviors.ListBoxDragDropBehavior;assembly=Behaviors"
+        xmlns:viewmodels="clr-namespace:ControlTests.ViewModels"
+        xmlns:views="clr-namespace:ControlTests.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         MouseDown="Window_MouseDown">
-    <Window.Resources>
-        <DataTemplate x:Key="listBoxDataTemplate" DataType="{x:Type local:Person}">
-            <Border BorderThickness="1" BorderBrush="DarkBlue" Background="LightBlue">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Width="150" Text="{Binding Path=Name}"/>
-                </StackPanel>
-            </Border>
-        </DataTemplate>
-    </Window.Resources>
     <Window.DataContext>
-        <local:ViewModel />
+        <viewmodels:MainViewModel/>
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -28,29 +17,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Grid.Column="2">
-            Click Me</Button>
-        <controls:ListBoxMultiSelect
-            x:Name="LB1"
-            Grid.Column="0"
-            SelectionMode="Extended"
-            ItemsSource="{Binding Path=People}"
-            ItemTemplate="{StaticResource listBoxDataTemplate}">
-            <Interactivity:Interaction.Behaviors>
-                <ddBehavior:ListBoxDragDropBehavior
-                    Event="PreviewDrop"
-                    Command="{Binding TestCommand}"
-                    PassArguments="True"/>
-            </Interactivity:Interaction.Behaviors>
-        </controls:ListBoxMultiSelect>
-        <controls:ListBoxMultiSelect x:Name="LB2" Grid.Column="1" SelectionMode="Extended" DisplayMemberPath="Name">
-            <Interactivity:Interaction.Behaviors>
-                <ddBehavior:ListBoxDragDropBehavior
-                    Event="PreviewDrop"
-                    Command="{Binding TestCommand}"
-                    DataTemplate="{StaticResource listBoxDataTemplate}"
-                    PassArguments="True"/>
-            </Interactivity:Interaction.Behaviors>
-        </controls:ListBoxMultiSelect>
+        <views:PeopleView Grid.Column="0" DataContext="{Binding Building1}" />
+        <views:PeopleView Grid.Column="1" DataContext="{Binding Building2}" />
     </Grid>
 </Window>
