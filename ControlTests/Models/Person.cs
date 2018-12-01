@@ -8,17 +8,16 @@ namespace ControlTests.Models
 {
     public class Person
     {
-        private string _name;
-
         public Person(string name)
         {
-            _name = name;
+            Name = name;
         }
 
-        public string Name
+        public Person()
         {
-            get { return _name; }
-            set { _name = value; }
+            Name = "Bob";
         }
+
+        public string Name { get; set; }
     }
 }

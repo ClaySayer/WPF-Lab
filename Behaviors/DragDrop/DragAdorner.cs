@@ -19,8 +19,6 @@ namespace Behaviors.DragDrop
             _adornerLayer = adornerLayer;
             _offset = offset;
             _contentPresenter = new ContentPresenter() { Content = data, ContentTemplate = dataTemplate, Opacity = 0.75 };
-
-            _adornerLayer.Add(this);
         }
 
         protected override Size MeasureOverride(Size constraint)
@@ -31,7 +29,9 @@ namespace Behaviors.DragDrop
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            _contentPresenter.Arrange(new Rect(finalSize));
+            FrameworkElement el = (FrameworkElement)AdornedElement;
+            Size size = new Size(el.ActualWidth, finalSize.Height);
+            _contentPresenter.Arrange(new Rect(size));
             return finalSize;
         }
 

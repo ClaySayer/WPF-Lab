@@ -10,7 +10,7 @@ using Behaviors.DragDrop.DataFormats;
 
 namespace Behaviors.ListBoxDragDropBehavior
 {
-    public class ListBoxDragDropBehavior: Behavior<ListBox>
+    public class ListBoxDragDropBehavior : Behavior<ListBox>
     {
         #region Dependency Properties
         public static readonly DependencyProperty DragVisualProperty = DependencyProperty.Register("DragVisual", typeof(DataTemplate), typeof(ListBoxDragDropBehavior), null);
@@ -86,11 +86,11 @@ namespace Behaviors.ListBoxDragDropBehavior
 
         private DataTemplate SelectDragVisualTemplate()
         {
-            if(DragVisual != null)
+            if (DragVisual != null)
             {
                 return DragVisual;
             }
-            if(AssociatedObject.ItemTemplate != null)
+            if (AssociatedObject.ItemTemplate != null)
             {
                 return AssociatedObject.ItemTemplate;
             }
@@ -105,7 +105,7 @@ namespace Behaviors.ListBoxDragDropBehavior
 
         private void OnDropCompleted(object sender, DragDrop.EventArgs.DragEventArgs e)
         {
-            UIElement element = sender as UIElement;
+            //UIElement element = sender as UIElement;
             //e.RoutedEvent = Controls.ListBoxMultiSelect.DropCompletedEvent;
             //element.RaiseEvent(e);
         }

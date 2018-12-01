@@ -16,6 +16,11 @@ namespace ControlTests.ViewModels
             set => SetProperty(ref _person, value);
         }
 
+        public PersonViewModel()
+        {
+            _person = new Person("Bob");
+        }
+
         public PersonViewModel(string name)
         {
             _person = new Person(name);
@@ -24,6 +29,11 @@ namespace ControlTests.ViewModels
         public string Name
         {
             get => _person.Name;
+        }
+
+        public override string ToString()
+        {
+            return _person.Name;
         }
     }
 }

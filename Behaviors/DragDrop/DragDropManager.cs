@@ -239,6 +239,7 @@ namespace Behaviors.DragDrop
                     {
                         var adornerLayer = AdornerLayer.GetAdornerLayer(element);
                         dragAdorner = new DragAdorner(data, dragVisual, element, adornerLayer, dragOffset);
+                        adornerLayer.Add(dragAdorner);
                         dragAdorner.UpdatePosition(position.X, position.Y);
                     }
                 }

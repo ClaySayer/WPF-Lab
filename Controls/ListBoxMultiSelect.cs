@@ -6,12 +6,6 @@ namespace Controls
 {
     public class ListBoxMultiSelect : System.Windows.Controls.ListBox
     {
-        public static readonly RoutedEvent DropCompletedEvent = EventManager.RegisterRoutedEvent("Fred", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UIElement));
-        public event RoutedEventHandler DropCompleted
-        {
-            add { AddHandler(DropCompletedEvent, value); }
-            remove { RemoveHandler(DropCompletedEvent, value); }
-        }
         public ListBoxMultiSelect()
         {
             SelectionMode = SelectionMode.Extended;
@@ -36,6 +30,11 @@ namespace Controls
 
     public class ListBoxMultiSelectItem : ListBoxItem
     {
+        public ListBoxMultiSelectItem() : base()
+        {
+
+        }
+        
         private bool _deferSelection = false;
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
