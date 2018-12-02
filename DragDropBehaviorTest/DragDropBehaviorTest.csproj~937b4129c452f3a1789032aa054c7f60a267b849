@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{74C27BFA-B802-4AA9-9E97-0F769CC3B157}</ProjectGuid>
+    <ProjectGuid>{2A23D914-5B58-4ECE-97E8-E8D9C3F77B8C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>DragDropTest</RootNamespace>
-    <AssemblyName>DragDropTest</AssemblyName>
+    <RootNamespace>DragDropBehaviorTest</RootNamespace>
+    <AssemblyName>DragDropBehaviorTest</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -33,9 +33,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>DragDropTest.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -101,9 +98,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DragandDrop\DragandDrop.csproj">
-      <Project>{1bc30642-954e-4ca6-8cc0-2aba2e388602}</Project>
-      <Name>DragandDrop</Name>
+    <ProjectReference Include="..\Controls\Controls.csproj">
+      <Project>{4cc5550c-010f-4ad4-be5d-a994375f7b2d}</Project>
+      <Name>Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DragDropBehavior\DragDrop.csproj">
+      <Project>{d020b5ed-3b73-4004-93ce-c4bc9bf1689d}</Project>
+      <Name>DragDrop</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

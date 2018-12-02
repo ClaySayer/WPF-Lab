@@ -117,7 +117,7 @@
       <Project>{4cc5550c-010f-4ad4-be5d-a994375f7b2d}</Project>
       <Name>Controls</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DragDropBehavior\DragDrop.csproj">
+    <ProjectReference Include="..\DragDrop\DragDrop.csproj">
       <Project>{d020b5ed-3b73-4004-93ce-c4bc9bf1689d}</Project>
       <Name>DragDrop</Name>
     </ProjectReference>
